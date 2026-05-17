@@ -52,10 +52,10 @@ var sway_decay: float = 14.0
 var sway_time: float = 0.0
 var sway_speed: float = 14.0
 
-# Hasar flash
+# Ekran flash (hasar/level up vs)
 var flash_amount: float = 0.0
 var flash_decay: float = 1.4
-var flash_peak: float = 0.35
+var flash_color_base: Color = Color(0.9, 0.1, 0.1)
 
 func _ready():
 	add_to_group(\"player\")
@@ -124,7 +124,7 @@ func _update_camera_effects(delta):
 	if flash_amount > 0.0:
 		flash_amount = max(0.0, flash_amount - flash_decay * delta)
 	if damage_flash:
-		damage_flash.color = Color(0.9, 0.1, 0.1, flash_amount)
+		damage_flash.color = Color(flash_color_base.r, flash_color_base.g, flash_color_base.b, flash_amount)
 
 func shake_screen(amount: float):
 	shake_amount = max(shake_amount, amount)
@@ -225,10 +225,17 @@ func take_damage(amount: float):
 	current_hp -= amount
 	current_hp = clamp(current_hp, 0, max_hp)
 	shake_screen(10.0)
-	flash_amount = max(flash_amount, flash_peak)
+	flash_color_base = Color(0.9, 0.1, 0.1)
+	flash_decay = 1.4
+	flash_amount = max(flash_amount, 0.35)
 	queue_redraw()
 	if current_hp <= 0:
 		_die()
+
+func flash_level_up():
+	flash_color_base = Color(0.25, 0.95, 0.4)
+	flash_decay = 0.9
+	flash_amount = max(flash_amount, 0.5)
 
 func _die():
 	get_tree().reload_current_scene()

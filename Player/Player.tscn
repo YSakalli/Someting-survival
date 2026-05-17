@@ -137,10 +137,19 @@ func _handle_shooting(delta):
 	if shoot_timer > 0:
 		shoot_timer -= delta
 
+var zoom_min: float = 2.0
+var zoom_max: float = 8.0
+var zoom_step: float = 0.5
+
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_try_shoot()
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				_try_shoot()
+			MOUSE_BUTTON_WHEEL_UP:
+				_zoom_camera(zoom_step)
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_zoom_camera(-zoom_step)
 
 func _try_shoot():
 	if shoot_timer > 0:
@@ -150,6 +159,12 @@ func _try_shoot():
 		return
 	shoot_timer = fire_rate
 	_shoot(target)
+
+func _zoom_camera(delta_zoom: float):
+	if camera == null:
+		return
+	var new_zoom = clamp(camera.zoom.x + delta_zoom, zoom_min, zoom_max)
+	camera.zoom = Vector2(new_zoom, new_zoom)
 
 func _handle_water(delta):
 	if not water_unlocked:

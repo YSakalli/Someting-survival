@@ -909,6 +909,43 @@ func _build_card(skill: Dictionary) -> Control:
 	btn.flat = true
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.pressed.connect(_on_skill_selected.bind(skill))
+	btn.flat = false
+	var sb_normal = StyleBoxFlat.new()
+	sb_normal.bg_color = Color(0, 0, 0, 0)
+	sb_normal.border_color = Color(0, 0, 0, 0)
+	sb_normal.corner_radius_top_left = 10
+	sb_normal.corner_radius_top_right = 10
+	sb_normal.corner_radius_bottom_left = 10
+	sb_normal.corner_radius_bottom_right = 10
+	var sb_hover = StyleBoxFlat.new()
+	sb_hover.bg_color = Color(1, 1, 1, 0.08)
+	sb_hover.border_width_left = 2
+	sb_hover.border_width_right = 2
+	sb_hover.border_width_top = 2
+	sb_hover.border_width_bottom = 2
+	sb_hover.border_color = Color(1, 1, 1, 0.9)
+	sb_hover.corner_radius_top_left = 10
+	sb_hover.corner_radius_top_right = 10
+	sb_hover.corner_radius_bottom_left = 10
+	sb_hover.corner_radius_bottom_right = 10
+	sb_hover.shadow_size = 28
+	sb_hover.shadow_color = Color(1, 0.95, 0.6, 0.65)
+	btn.add_theme_stylebox_override(\"normal\", sb_normal)
+	btn.add_theme_stylebox_override(\"hover\", sb_hover)
+	btn.add_theme_stylebox_override(\"pressed\", sb_hover)
+	btn.add_theme_stylebox_override(\"focus\", sb_normal)
+	btn.add_theme_stylebox_override(\"disabled\", sb_normal)
+	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2)
+	btn.mouse_entered.connect(func():
+		btn.pivot_offset = btn.size / 2
+		var tw = create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(btn, \"scale\", Vector2(1.06, 1.06), 0.12)
+	)
+	btn.mouse_exited.connect(func():
+		var tw = create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(1, 1), 0.12)
+	)
 	var vbox = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1061,7 +1098,7 @@ stretch_mode = 5
 [node name="HBoxContainer" type="HBoxContainer" parent="SkillMenu/Frame" unique_id=1125702368]
 layout_mode = 0
 offset_left = 110.0
-offset_top = 150.0
+offset_top = 117.0
 offset_right = 1090.0
-offset_bottom = 510.0
+offset_bottom = 477.0
 theme_override_constants/separation = 32

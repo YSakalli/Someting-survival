@@ -42,7 +42,7 @@ var wood_bounce_count = 1
 
 @onready var anim = $AnimationPlayer
 @onready var camera = $Camera2D
-# comment
+@onready var damage_flash: ColorRect = $DamageFlash/Rect
 
 # Kamera efektleri
 var shake_amount: float = 0.0
@@ -51,6 +51,11 @@ var sway_amount: float = 0.0
 var sway_decay: float = 6.0
 var sway_time: float = 0.0
 var sway_speed: float = 14.0
+
+# Hasar flash
+var flash_amount: float = 0.0
+var flash_decay: float = 1.4
+var flash_peak: float = 0.35
 
 func _ready():
 	add_to_group(\"player\")
@@ -116,6 +121,10 @@ func _update_camera_effects(delta):
 		offset.x += sin(sway_time * sway_speed) * sway_amount
 		offset.y += cos(sway_time * sway_speed * 0.5) * sway_amount * 0.3
 	camera.offset = offset
+	if flash_amount > 0.0:
+		flash_amount = max(0.0, flash_amount - flash_decay * delta)
+	if damage_flash:
+		damage_flash.color = Color(0.9, 0.1, 0.1, flash_amount)
 
 func shake_screen(amount: float):
 	shake_amount = max(shake_amount, amount)
@@ -216,6 +225,7 @@ func take_damage(amount: float):
 	current_hp -= amount
 	current_hp = clamp(current_hp, 0, max_hp)
 	shake_screen(10.0)
+	flash_amount = max(flash_amount, flash_peak)
 	queue_redraw()
 	if current_hp <= 0:
 		_die()
@@ -483,3 +493,15 @@ vframes = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1515031790]
 libraries/ = SubResource("AnimationLibrary_3mea3")
+
+[node name="DamageFlash" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Rect" type="ColorRect" parent="DamageFlash"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.9, 0.1, 0.1, 0)

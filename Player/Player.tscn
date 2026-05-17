@@ -13,8 +13,8 @@ script/source = "extends CharacterBody2D
 @export var speed: float = 200.0
 
 # Can
-@export var max_hp: float = 100.0
-var current_hp: float = 100.0
+@export var max_hp: float = 200.0
+var current_hp: float = 10.0
 
 # Silah
 @export var bullet_scene: PackedScene
@@ -465,6 +465,7 @@ script = SubResource("GDScript_3qydi")
 bullet_scene = ExtResource("1_tok1r")
 air_bullet_scene = ExtResource("2_ddoul")
 water_bullet_scene = ExtResource("3_8g4oa")
+bullet_damage = 20.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1742984116]
 z_index = 3

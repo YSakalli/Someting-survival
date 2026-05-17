@@ -43,6 +43,7 @@ var wood_bounce_count = 1
 
 @onready var anim = $AnimationPlayer
 @onready var camera = $Camera2D
+# comment
 
 # Kamera efektleri
 var shake_amount: float = 0.0

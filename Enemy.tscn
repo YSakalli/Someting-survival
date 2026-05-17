@@ -1,10 +1,13 @@
 [gd_scene format=3 uid="uid://bl15dv38xgrij"]
 
 [ext_resource type="Texture2D" uid="uid://bds2toye5yjk0" path="res://isometric tileset/separated images/tile_044.png" id="1_tt7e2"]
+[ext_resource type="PackedScene" uid="uid://b5xpgemc7d2k8" path="res://XPGem.tscn" id="2_gem"]
 
 [sub_resource type="GDScript" id="GDScript_tt7e2"]
 resource_name = "Enemy"
 script/source = "extends CharacterBody2D
+
+@export var gem_scene: PackedScene
 
 var hp = 20.0
 var speed = 80.0
@@ -40,10 +43,15 @@ func _physics_process(delta):
 func take_damage(amount: float):
 	hp -= amount
 	if hp <= 0:
-		var gm = get_tree().get_first_node_in_group(\"game_manager\")
-		if gm:
-			gm.add_xp(5.0)
+		_drop_gem()
 		queue_free()
+
+func _drop_gem():
+	if gem_scene == null:
+		return
+	var gem = gem_scene.instantiate()
+	get_parent().add_child(gem)
+	gem.global_position = global_position
 
 func apply_knockback(force: Vector2):
 	knockback_velocity = force
@@ -64,6 +72,7 @@ height = 10.0
 [node name="Enemy" type="CharacterBody2D" unique_id=256564377]
 motion_mode = 1
 script = SubResource("GDScript_tt7e2")
+gem_scene = ExtResource("2_gem")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=140398501]
 shape = SubResource("CapsuleShape2D_s7bn3")

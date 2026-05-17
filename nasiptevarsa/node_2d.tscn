@@ -635,6 +635,8 @@ wood_bullet_scene = ExtResource("3_m3qd1")
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=299028389]
 position = Vector2(0, 1)
 zoom = Vector2(5, 5)
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
 
 [node name="Spawner" type="Node2D" parent="." unique_id=1811763108]
 position = Vector2(-1, -2)

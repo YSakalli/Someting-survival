@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bds7ky40j7ev1"]
 
-[ext_resource type="Script" path="res://42api/main.gd" id="1_login"]
+[ext_resource type="Script" uid="uid://dfqmgjcceyryr" path="res://42api/main.gd" id="1_login"]
 
-[node name="Login" type="Control"]
+[node name="Login" type="Control" unique_id=344822052]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

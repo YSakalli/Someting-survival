@@ -129,8 +129,10 @@ func _on_login_success(user_data: Dictionary) -> void:
 	var wallet: int = user_data.get("wallet", 0)
 	var correction_point: int = user_data.get("correction_point", 0)
 
-	_info_label.text = "Login: %s\nDisplay: %s\nEmail: %s\nCursus: %s\nLevel: %.2f\nWallet: %d Z\nCorrection points: %d" % [
-		login_name, display_name, email, cursus, level, wallet, correction_point
+	var coalition_name: String = user_data.get("coalition", "?")
+	var element_name: String = user_data.get("element", "fire")
+	_info_label.text = "Login: %s\nDisplay: %s\nEmail: %s\nCursus: %s\nLevel: %.2f\nWallet: %d Z\nCorrection points: %d\nCoalition: %s\nElement: %s" % [
+		login_name, display_name, email, cursus, level, wallet, correction_point, coalition_name, element_name
 	]
 
 	# Avatar indir

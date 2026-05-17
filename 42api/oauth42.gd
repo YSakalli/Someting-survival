@@ -17,6 +17,7 @@ signal login_failed(error: String)
 const AUTH_URL := "https://api.intra.42.fr/oauth/authorize"
 const TOKEN_URL := "https://api.intra.42.fr/oauth/token"
 const ME_URL := "https://api.intra.42.fr/v2/me"
+const COALITIONS_URL := "https://api.intra.42.fr/v2/me/coalitions"
 
 var _uid: String = ""
 var _secret: String = ""
@@ -26,12 +27,15 @@ var _redirect_port: int = 8765
 var _state_token: String = ""
 var access_token: String = ""
 var user_data: Dictionary = {}
+var coalition: String = ""
+var element: String = "fire"
 
 var _tcp_server: TCPServer = null
 var _pending_peers: Array = []  # [{peer: StreamPeerTCP, buffer: String}, ...]
 
 var _http_token: HTTPRequest
 var _http_me: HTTPRequest
+var _http_coalitions: HTTPRequest
 
 
 func _ready() -> void:
@@ -45,6 +49,10 @@ func _ready() -> void:
 	_http_me = HTTPRequest.new()
 	add_child(_http_me)
 	_http_me.request_completed.connect(_on_me_response)
+
+	_http_coalitions = HTTPRequest.new()
+	add_child(_http_coalitions)
+	_http_coalitions.request_completed.connect(_on_coalitions_response)
 
 
 func _load_secrets() -> void:
@@ -267,4 +275,47 @@ func _on_me_response(_result: int, response_code: int, _headers: PackedStringArr
 		emit_signal("login_failed", "/v2/me cevabi parse edilemedi.")
 		return
 	user_data = json
-	emit_signal("login_success", json)
+	emit_signal("status_changed", "Koalisyon bilgisi cekiliyor...")
+	_fetch_coalitions()
+
+
+func _fetch_coalitions() -> void:
+	var headers := ["Authorization: Bearer " + access_token]
+	var err := _http_coalitions.request(COALITIONS_URL, headers, HTTPClient.METHOD_GET)
+	if err != OK:
+		# Coalition gelemese de login tamamlanmis sayalim
+		emit_signal("login_success", user_data)
+
+
+func _on_coalitions_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	var text := body.get_string_from_utf8()
+	print("[OAuth42] coalitions HTTP %d body=%s" % [response_code, text])
+	if response_code == 200:
+		var json: Variant = JSON.parse_string(text)
+		if typeof(json) == TYPE_ARRAY and (json as Array).size() > 0:
+			# Birden fazla varsa ilkini birincil kabul et
+			var primary: Dictionary = (json as Array)[0]
+			coalition = String(primary.get("name", ""))
+			var slug: String = String(primary.get("slug", ""))
+			element = _coalition_to_element(coalition, slug)
+			user_data["coalition"] = coalition
+			user_data["element"] = element
+			print("[OAuth42] coalition='%s' slug='%s' -> element='%s'" % [coalition, slug, element])
+		else:
+			print("[OAuth42] coalitions cevabi bos veya array degil")
+	else:
+		push_warning("[OAuth42] coalitions endpoint %d dondu" % response_code)
+	emit_signal("login_success", user_data)
+
+
+func _coalition_to_element(name: String, slug: String) -> String:
+	var key := (name + " " + slug).to_lower()
+	if "aqualis" in key:
+		return "water"
+	if "terranos" in key:
+		return "wood"
+	if "aerys" in key:
+		return "air"
+	if "ignatus" in key:
+		return "fire"
+	return "fire"

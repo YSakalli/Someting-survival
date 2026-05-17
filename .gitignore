@@ -5,7 +5,7 @@
 .import/
 export.cfg
 export_presets.cfg
-42api/secret.cfg
+42api/secrets.cfg
 
 # Mono / C# builds
 .mono/

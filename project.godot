@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Yeni Oyun Projesi"
-run/main_scene="uid://c1v4v2aahqnw4"
+run/main_scene="res://42api/login.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+OAuth42="*res://42api/oauth42.gd"
 
 [display]
 

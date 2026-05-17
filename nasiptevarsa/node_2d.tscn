@@ -834,6 +834,7 @@ func _ready():
 	var gm = get_tree().get_first_node_in_group(\"game_manager\")
 	if gm and gm.has_signal(\"level_up\"):
 		gm.level_up.connect(_on_level_up)
+	
 
 func _process(delta):
 	elapsed += delta

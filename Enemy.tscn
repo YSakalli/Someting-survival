@@ -34,8 +34,12 @@ func _physics_process(delta):
 		var dir = (player.global_position - global_position).normalized()
 		velocity = dir * speed
 	move_and_slide()
+
+	# Player'a yakınsa hasar ver ama itme, kendini geri çek
 	if global_position.distance_to(player.global_position) < 20:
 		player.take_damage(damage * delta)
+		var push_back = (global_position - player.global_position).normalized()
+		global_position += push_back * speed * delta
 
 func take_damage(amount: float):
 	hp -= amount

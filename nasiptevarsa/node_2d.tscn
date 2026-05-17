@@ -617,6 +617,46 @@ func _on_skill_selected(skill: Dictionary):
 	visible = false
 "
 
+[sub_resource type="SystemFont" id="SystemFont_pixel"]
+font_names = PackedStringArray("Consolas", "Courier New", "monospace")
+antialiasing = 0
+subpixel_positioning = 0
+hinting = 0
+multichannel_signed_distance_field = false
+
+[sub_resource type="GDScript" id="GDScript_hud"]
+script/source = "extends CanvasLayer
+
+var elapsed: float = 0.0
+
+@onready var timer_label: Label = $TimerLabel
+@onready var level_label: Label = $LevelLabel
+
+func _ready():
+	add_to_group(\"hud\")
+	_refresh_level()
+	var gm = get_tree().get_first_node_in_group(\"game_manager\")
+	if gm and gm.has_signal(\"level_up\"):
+		gm.level_up.connect(_on_level_up)
+
+func _process(delta):
+	elapsed += delta
+	var total_seconds = int(elapsed)
+	var minutes = total_seconds / 60
+	var seconds = total_seconds % 60
+	timer_label.text = \"%02d:%02d\" % [minutes, seconds]
+
+func _on_level_up(new_level):
+	level_label.text = \"LVL %d\" % new_level
+
+func _refresh_level():
+	var gm = get_tree().get_first_node_in_group(\"game_manager\")
+	if gm:
+		level_label.text = \"LVL %d\" % gm.level
+	else:
+		level_label.text = \"LVL 1\"
+"
+
 [node name="Main" type="Node2D" unique_id=1073499203]
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=959560826]
@@ -646,6 +686,43 @@ spawn_interval = 0.2
 
 [node name="Game manager" type="Node" parent="." unique_id=1805539141]
 script = SubResource("GDScript_m3qd1")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = SubResource("GDScript_hud")
+
+[node name="TimerLabel" type="Label" parent="HUD"]
+texture_filter = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -90.0
+offset_top = 14.0
+offset_right = 90.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = SubResource("SystemFont_pixel")
+theme_override_font_sizes/font_size = 32
+text = "00:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="HUD"]
+texture_filter = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 14.0
+offset_right = -20.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = SubResource("SystemFont_pixel")
+theme_override_font_sizes/font_size = 26
+text = "LVL 1"
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="SkillMenu" type="CanvasLayer" parent="." unique_id=2064018963]
 process_mode = 3

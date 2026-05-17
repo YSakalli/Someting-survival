@@ -611,8 +611,10 @@ func _on_skill_selected(skill: Dictionary):
 	if player == null:
 		return
 	player.call(skill[\"action\"], skill[\"value\"])
+	if player.has_method(\"shake_screen\"):
+		player.shake_screen(22.0)
 	if player.has_method(\"sway_screen\"):
-		player.sway_screen(18.0)
+		player.sway_screen(5.0)
 	get_tree().paused = false
 	visible = false
 "

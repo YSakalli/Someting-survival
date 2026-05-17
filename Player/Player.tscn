@@ -48,7 +48,7 @@ var wood_bounce_count = 1
 var shake_amount: float = 0.0
 var shake_decay: float = 25.0
 var sway_amount: float = 0.0
-var sway_decay: float = 6.0
+var sway_decay: float = 14.0
 var sway_time: float = 0.0
 var sway_speed: float = 14.0
 

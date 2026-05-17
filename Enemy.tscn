@@ -70,11 +70,14 @@ radius = 5.0
 height = 10.0
 
 [node name="Enemy" type="CharacterBody2D" unique_id=256564377]
+collision_layer = 4
+collision_mask = 0
 motion_mode = 1
 script = SubResource("GDScript_tt7e2")
 gem_scene = ExtResource("2_gem")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=140398501]
+y_sort_enabled = true
 shape = SubResource("CapsuleShape2D_s7bn3")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2039865767]

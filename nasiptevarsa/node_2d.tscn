@@ -638,7 +638,7 @@ zoom = Vector2(2, 2)
 position = Vector2(-1, -2)
 script = SubResource("GDScript_5m0gc")
 enemy_scene = ExtResource("3_5m0gc")
-spawn_interval = 1.0
+spawn_interval = 0.2
 
 [node name="Game manager" type="Node" parent="." unique_id=1805539141]
 script = SubResource("GDScript_m3qd1")

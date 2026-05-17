@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://cv1xbid8vyrft"]
 
-[ext_resource type="Texture2D" uid="uid://bgrvpjyy1k67l" path="res://Player/Cat_1_spritesheet_free.png" id="1_q3lat"]
 [ext_resource type="PackedScene" uid="uid://4utqj5d51r68" path="res://Player/Bullet/Bulletfire.tscn" id="1_tok1r"]
 [ext_resource type="PackedScene" uid="uid://tr1eaxoke6ny" path="res://Player/Bullet/Air.tscn" id="2_ddoul"]
 [ext_resource type="PackedScene" uid="uid://csmyf70htxiyw" path="res://Player/Bullet/Water.tscn" id="3_8g4oa"]
@@ -286,6 +285,9 @@ func _play_animation(input: Vector2):
 radius = 7.0
 height = 20.0
 
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_tok1r"]
+load_path = "res://.godot/imported/Cat_1_spritesheet_free.png-747f7430249385dcdc2d08b4baa4fa40.ctex"
+
 [sub_resource type="Animation" id="Animation_8g4oa"]
 length = 0.001
 tracks/0/type = "value"
@@ -475,7 +477,7 @@ shape = SubResource("CapsuleShape2D_3qydi")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=334690259]
 position = Vector2(0, 1)
-texture = ExtResource("1_q3lat")
+texture = SubResource("CompressedTexture2D_tok1r")
 hframes = 32
 vframes = 2
 

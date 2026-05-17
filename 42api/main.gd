@@ -131,9 +131,13 @@ func _on_login_success(user_data: Dictionary) -> void:
 
 	var coalition_name: String = user_data.get("coalition", "?")
 	var element_name: String = user_data.get("element", "fire")
-	_info_label.text = "Login: %s\nDisplay: %s\nEmail: %s\nCursus: %s\nLevel: %.2f\nWallet: %d Z\nCorrection points: %d\nCoalition: %s\nElement: %s" % [
-		login_name, display_name, email, cursus, level, wallet, correction_point, coalition_name, element_name
+	var coa_status: int = OAuth42.last_coalitions_status
+	var coa_body: String = OAuth42.last_coalitions_body
+	var coa_preview: String = coa_body.substr(0, 240)
+	_info_label.text = "Login: %s\nDisplay: %s\nEmail: %s\nCursus: %s\nLevel: %.2f\nWallet: %d Z\nCorrection points: %d\nCoalition: %s\nElement: %s\n\n[debug] coalitions HTTP %d\nbody: %s" % [
+		login_name, display_name, email, cursus, level, wallet, correction_point, coalition_name, element_name, coa_status, coa_preview
 	]
+	print("[main] coalitions HTTP=%d full body=%s" % [coa_status, coa_body])
 
 	# Avatar indir
 	var image_info: Dictionary = user_data.get("image", {})

@@ -17,7 +17,7 @@ signal login_failed(error: String)
 const AUTH_URL := "https://api.intra.42.fr/oauth/authorize"
 const TOKEN_URL := "https://api.intra.42.fr/oauth/token"
 const ME_URL := "https://api.intra.42.fr/v2/me"
-const COALITIONS_URL := "https://api.intra.42.fr/v2/me/coalitions"
+const COALITIONS_URL_FMT := "https://api.intra.42.fr/v2/users/%d/coalitions"
 
 var _uid: String = ""
 var _secret: String = ""
@@ -29,6 +29,8 @@ var access_token: String = ""
 var user_data: Dictionary = {}
 var coalition: String = ""
 var element: String = "fire"
+var last_coalitions_status: int = 0
+var last_coalitions_body: String = ""
 
 var _tcp_server: TCPServer = null
 var _pending_peers: Array = []  # [{peer: StreamPeerTCP, buffer: String}, ...]
@@ -61,12 +63,14 @@ func _load_secrets() -> void:
 	if err != OK:
 		push_warning("42api/secrets.cfg yuklenemedi (err=%d). UID/SECRET'i doldur." % err)
 		return
-	_uid = cfg.get_value("api42", "uid", "")
-	_secret = cfg.get_value("api42", "secret", "")
-	_redirect_uri = cfg.get_value("api42", "redirect_uri", _redirect_uri)
+	_uid = String(cfg.get_value("api42", "uid", "")).strip_edges()
+	_secret = String(cfg.get_value("api42", "secret", "")).strip_edges()
+	_redirect_uri = String(cfg.get_value("api42", "redirect_uri", _redirect_uri)).strip_edges()
 	# Port'u redirect_uri'den cikar
 	var port_part := _redirect_uri.split(":")[2]  # "8765/callback"
 	_redirect_port = int(port_part.split("/")[0])
+	var uid_prefix := _uid.substr(0, 12) if _uid.length() > 12 else _uid
+	print("[OAuth42] secrets yuklendi: uid_len=%d uid_prefix='%s' secret_len=%d redirect='%s'" % [_uid.length(), uid_prefix, _secret.length(), _redirect_uri])
 
 
 func start_login() -> void:
@@ -280,8 +284,15 @@ func _on_me_response(_result: int, response_code: int, _headers: PackedStringArr
 
 
 func _fetch_coalitions() -> void:
+	var user_id: int = int(user_data.get("id", 0))
+	if user_id <= 0:
+		push_warning("[OAuth42] user id alinamadi, coalition atlandi")
+		emit_signal("login_success", user_data)
+		return
+	var url := COALITIONS_URL_FMT % user_id
+	print("[OAuth42] coalitions URL=", url)
 	var headers := ["Authorization: Bearer " + access_token]
-	var err := _http_coalitions.request(COALITIONS_URL, headers, HTTPClient.METHOD_GET)
+	var err := _http_coalitions.request(url, headers, HTTPClient.METHOD_GET)
 	if err != OK:
 		# Coalition gelemese de login tamamlanmis sayalim
 		emit_signal("login_success", user_data)
@@ -289,6 +300,8 @@ func _fetch_coalitions() -> void:
 
 func _on_coalitions_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var text := body.get_string_from_utf8()
+	last_coalitions_status = response_code
+	last_coalitions_body = text
 	print("[OAuth42] coalitions HTTP %d body=%s" % [response_code, text])
 	if response_code == 200:
 		var json: Variant = JSON.parse_string(text)

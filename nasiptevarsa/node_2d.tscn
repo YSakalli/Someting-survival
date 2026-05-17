@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cv1xbid8vyrft" path="res://Player/Player.tscn" id="2_8akx7"]
 [ext_resource type="PackedScene" uid="uid://bl15dv38xgrij" path="res://Enemy.tscn" id="3_5m0gc"]
 [ext_resource type="PackedScene" uid="uid://dip7aqituo5cx" path="res://Player/Bullet/Wood.tscn" id="3_m3qd1"]
+[ext_resource type="Texture2D" uid="uid://c7lhsjjejed88" path="res://src/upgrade.png" id="4_frame"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8akx7"]
 texture = ExtResource("1_secbg")
@@ -569,22 +570,28 @@ func _on_level_up(_new_level):
 script/source = "extends CanvasLayer
 
 var player: Node2D = null
+var pixel_font: SystemFont = null
 
 var all_skills = [
-	{\"name\": \"Hız Artışı\",  \"desc\": \"Hareket hızın +30\",        \"action\": \"upgrade_speed\",        \"value\": 30.0},
-	{\"name\": \"Ateş Hızı\",   \"desc\": \"Daha sık ateş edersin\",    \"action\": \"upgrade_fire_rate\",    \"value\": 0.1},
-	{\"name\": \"Hasar\",       \"desc\": \"Mermi hasarın +10\",         \"action\": \"upgrade_damage\",       \"value\": 10.0},
-	{\"name\": \"Can Artışı\",  \"desc\": \"Max canın +50\",             \"action\": \"upgrade_max_hp\",       \"value\": 50.0},
-	{\"name\": \"Çift Mermi\",  \"desc\": \"İki yönde ateş edersin\",   \"action\": \"upgrade_double_shot\",  \"value\": 1.0},
-	{\"name\": \"Mermi Hızı\",  \"desc\": \"Mermi hızın +100\",         \"action\": \"upgrade_bullet_speed\", \"value\": 100.0},
-	{\"name\": \"Air\",         \"desc\": \"Takip eden, seken mermi\",  \"action\": \"upgrade_air_bullet\",   \"value\": 1.0},
-	{\"name\": \"Water\",       \"desc\": \"Düşmanı donduran su\",      \"action\": \"upgrade_water_bullet\", \"value\": 1.0},
-	{\"name\": \"Wood\",        \"desc\": \"Geri iten, seken mermi\",   \"action\": \"upgrade_wood_bullet\",  \"value\": 1.0},
+	{\"name\": \"HIZ\",        \"action\": \"upgrade_speed\",        \"value\": 30.0,  \"icon\": \"res://src/hareket hızı.png\"},
+	{\"name\": \"ATES HIZI\",  \"action\": \"upgrade_fire_rate\",    \"value\": 0.1,   \"icon\": \"res://src/saldırı hızı2.png\"},
+	{\"name\": \"HASAR\",      \"action\": \"upgrade_damage\",       \"value\": 10.0,  \"icon\": \"res://src/saldırı gücü.png\"},
+	{\"name\": \"CAN\",        \"action\": \"upgrade_max_hp\",       \"value\": 50.0,  \"icon\": \"res://src/can artışı.png\"},
+	{\"name\": \"CIFT MERMI\", \"action\": \"upgrade_double_shot\",  \"value\": 1.0,   \"icon\": \"res://src/çift saldırı.png\"},
+	{\"name\": \"MERMI HIZI\", \"action\": \"upgrade_bullet_speed\", \"value\": 100.0, \"icon\": \"res://src/hareket hızı.png\"},
+	{\"name\": \"AIR\",        \"action\": \"upgrade_air_bullet\",   \"value\": 1.0,   \"icon\": \"res://src/Air/Retro Impact Effect Pack 3 F.png\"},
+	{\"name\": \"WATER\",      \"action\": \"upgrade_water_bullet\", \"value\": 1.0,   \"icon\": \"res://src/Water/Retro Impact Effect Pack 3 C.png\"},
+	{\"name\": \"WOOD\",       \"action\": \"upgrade_wood_bullet\",  \"value\": 1.0,   \"icon\": \"res://src/saldırı gücü.png\"},
 ]
 
 func _ready():
 	add_to_group(\"skill_menu\")
 	visible = false
+	pixel_font = SystemFont.new()
+	pixel_font.font_names = PackedStringArray([\"Consolas\", \"Courier New\", \"monospace\"])
+	pixel_font.antialiasing = 0
+	pixel_font.subpixel_positioning = 0
+	pixel_font.hinting = 0
 	player = get_tree().get_first_node_in_group(\"player\")
 
 func show_menu():
@@ -594,18 +601,54 @@ func show_menu():
 	_create_cards()
 
 func _create_cards():
-	var hbox = $Panel/VBoxContainer/HBoxContainer
+	var hbox = $Frame/HBoxContainer
 	for child in hbox.get_children():
 		child.queue_free()
 	var shuffled = all_skills.duplicate()
 	shuffled.shuffle()
 	var choices = shuffled.slice(0, 3)
 	for skill in choices:
-		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(180, 200)
-		btn.text = skill[\"name\"] + \"\\n\\n\" + skill[\"desc\"]
-		btn.pressed.connect(_on_skill_selected.bind(skill))
-		hbox.add_child(btn)
+		hbox.add_child(_build_card(skill))
+
+func _build_card(skill: Dictionary) -> Control:
+	var btn = Button.new()
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.pressed.connect(_on_skill_selected.bind(skill))
+
+	var vbox = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_theme_constant_override(\"separation\", 16)
+	btn.add_child(vbox)
+
+	if skill.has(\"icon\"):
+		var tex = load(skill[\"icon\"])
+		if tex:
+			var icon = TextureRect.new()
+			icon.texture = tex
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.custom_minimum_size = Vector2(140, 140)
+			icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			vbox.add_child(icon)
+
+	var name_label = Label.new()
+	name_label.text = skill[\"name\"]
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.add_theme_font_override(\"font\", pixel_font)
+	name_label.add_theme_font_size_override(\"font_size\", 28)
+	name_label.add_theme_color_override(\"font_color\", Color(1, 1, 1))
+	name_label.add_theme_color_override(\"font_outline_color\", Color(0, 0, 0))
+	name_label.add_theme_constant_override(\"outline_size\", 6)
+	vbox.add_child(name_label)
+
+	return btn
 
 func _on_skill_selected(skill: Dictionary):
 	if player == null:
@@ -728,22 +771,31 @@ vertical_alignment = 1
 process_mode = 3
 script = SubResource("GDScript_4kf6v")
 
-[node name="Panel" type="Panel" parent="SkillMenu" unique_id=421696304]
-offset_left = 84.0
-offset_top = 146.0
-offset_right = 734.0
-offset_bottom = 446.0
+[node name="Background" type="ColorRect" parent="SkillMenu"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SkillMenu/Panel" unique_id=1743511048]
-layout_mode = 0
-offset_left = 7.0
-offset_top = 3.0
-offset_right = 226.0
-offset_bottom = 43.0
+[node name="Frame" type="TextureRect" parent="SkillMenu"]
+texture_filter = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -600.0
+offset_top = -300.0
+offset_right = 600.0
+offset_bottom = 300.0
+mouse_filter = 2
+texture = ExtResource("4_frame")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Label" type="Label" parent="SkillMenu/Panel/VBoxContainer" unique_id=2120250459]
-layout_mode = 2
-text = "SEVİYE ATLADIN! Bir güç seç:"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="SkillMenu/Panel/VBoxContainer" unique_id=341973725]
-layout_mode = 2
+[node name="HBoxContainer" type="HBoxContainer" parent="SkillMenu/Frame"]
+offset_left = 110.0
+offset_top = 150.0
+offset_right = 1090.0
+offset_bottom = 510.0
+mouse_filter = 1
+theme_override_constants/separation = 32

@@ -573,15 +573,13 @@ var player: Node2D = null
 var pixel_font: SystemFont = null
 
 var all_skills = [
-	{\"name\": \"HIZ\",        \"action\": \"upgrade_speed\",        \"value\": 30.0,  \"icon\": \"res://src/hareket hızı.png\"},
-	{\"name\": \"ATES HIZI\",  \"action\": \"upgrade_fire_rate\",    \"value\": 0.1,   \"icon\": \"res://src/saldırı hızı2.png\"},
-	{\"name\": \"HASAR\",      \"action\": \"upgrade_damage\",       \"value\": 10.0,  \"icon\": \"res://src/saldırı gücü.png\"},
-	{\"name\": \"CAN\",        \"action\": \"upgrade_max_hp\",       \"value\": 50.0,  \"icon\": \"res://src/can artışı.png\"},
-	{\"name\": \"CIFT MERMI\", \"action\": \"upgrade_double_shot\",  \"value\": 1.0,   \"icon\": \"res://src/çift saldırı.png\"},
-	{\"name\": \"MERMI HIZI\", \"action\": \"upgrade_bullet_speed\", \"value\": 100.0, \"icon\": \"res://src/hareket hızı.png\"},
-	{\"name\": \"AIR\",        \"action\": \"upgrade_air_bullet\",   \"value\": 1.0,   \"icon\": \"res://src/Air/Retro Impact Effect Pack 3 F.png\"},
-	{\"name\": \"WATER\",      \"action\": \"upgrade_water_bullet\", \"value\": 1.0,   \"icon\": \"res://src/Water/Retro Impact Effect Pack 3 C.png\"},
-	{\"name\": \"WOOD\",       \"action\": \"upgrade_wood_bullet\",  \"value\": 1.0,   \"icon\": \"res://src/saldırı gücü.png\"},
+	{\"name\": \"HAREKET HIZI\", \"action\": \"upgrade_speed\",        \"value\": 30.0, \"icon\": \"res://src/hareket hızı.png\"},
+	{\"name\": \"SALDIRI HIZI\", \"action\": \"upgrade_fire_rate\",    \"value\": 0.1,  \"icon\": \"res://src/saldırı hızı2.png\"},
+	{\"name\": \"SALDIRI GÜCÜ\", \"action\": \"upgrade_damage\",       \"value\": 10.0, \"icon\": \"res://src/saldırı gücü.png\"},
+	{\"name\": \"CAN ARTIŞI\",   \"action\": \"upgrade_max_hp\",       \"value\": 50.0, \"icon\": \"res://src/can artışı.png\"},
+	{\"name\": \"ÇİFT SALDIRI\", \"action\": \"upgrade_double_shot\",  \"value\": 1.0,  \"icon\": \"res://src/çift saldırı.png\"},
+	{\"name\": \"AIR\",          \"action\": \"upgrade_air_bullet\",   \"value\": 1.0,  \"icon\": \"res://src/Air/Retro Impact Effect Pack 3 F.png\"},
+	{\"name\": \"WATER\",        \"action\": \"upgrade_water_bullet\", \"value\": 1.0,  \"icon\": \"res://src/Water/Retro Impact Effect Pack 3 C.png\"},
 ]
 
 func _ready():
@@ -622,7 +620,7 @@ func _build_card(skill: Dictionary) -> Control:
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_theme_constant_override(\"separation\", 16)
+	vbox.add_theme_constant_override(\"separation\", 50)
 	btn.add_child(vbox)
 
 	if skill.has(\"icon\"):

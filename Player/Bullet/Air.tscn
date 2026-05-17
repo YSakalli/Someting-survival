@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://tr1eaxoke6ny"]
+
+[ext_resource type="Texture2D" uid="uid://djmabm0k8bg35" path="res://src/Air/Retro Impact Effect Pack 3 F.png" id="1_ifqw1"]
+
+[sub_resource type="GDScript" id="GDScript_8akx7"]
+script/source = "extends Area2D
+
+var damage = 8.0
+var hits_remaining = 1
+var bounce_count = 1
+var hit_enemies = []
+var current_target: Node2D = null
+var speed = 100.0
+var move_velocity = Vector2.ZERO
+
+func _ready():
+	body_entered.connect(_on_body_entered)
+
+func _physics_process(delta):
+	if current_target and is_instance_valid(current_target):
+		var dir = (current_target.global_position - global_position).normalized()
+		move_velocity = move_velocity.lerp(dir * speed, 0.1)
+	position += move_velocity * delta
+
+func set_target(target: Node2D):
+	current_target = target
+
+func _on_body_entered(body):
+	if not body.is_in_group(\"enemies\"):
+		return
+	if body in hit_enemies:
+		return
+	hit_enemies.append(body)
+	body.take_damage(damage)
+	hits_remaining -= 1
+	if hits_remaining <= 0:
+		queue_free()
+		return
+	_find_next_target(body)
+
+func _find_next_target(_current_enemy: Node2D):
+	var enemies = get_tree().get_nodes_in_group(\"enemies\")
+	var nearest = null
+	var min_dist = INF
+	for e in enemies:
+		if e in hit_enemies:
+			continue
+		var d = global_position.distance_to(e.global_position)
+		if d < min_dist:
+			min_dist = d
+			nearest = e
+	if nearest:
+		current_target = nearest
+	else:
+		queue_free()
+
+func _on_visible_on_screen_notifier_2d_screen_exited():
+	queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5m0gc"]
+radius = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ni42o"]
+atlas = ExtResource("1_ifqw1")
+region = Rect2(0, 320, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbojl"]
+atlas = ExtResource("1_ifqw1")
+region = Rect2(32, 320, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ewbq"]
+atlas = ExtResource("1_ifqw1")
+region = Rect2(64, 320, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ubh3w"]
+atlas = ExtResource("1_ifqw1")
+region = Rect2(96, 320, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8fy2"]
+atlas = ExtResource("1_ifqw1")
+region = Rect2(128, 320, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7ckxb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ni42o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbojl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ewbq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ubh3w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k8fy2")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[node name="Bullet" type="Area2D" unique_id=1095273970]
+script = SubResource("GDScript_8akx7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1641536895]
+shape = SubResource("CircleShape2D_5m0gc")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1556292767]
+texture_filter = 1
+position = Vector2(0, 1.4210855e-14)
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_7ckxb")
+animation = &"fly"
+frame_progress = 0.61833215

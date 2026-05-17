@@ -1,0 +1,419 @@
+[gd_scene format=3 uid="uid://cv1xbid8vyrft"]
+
+[ext_resource type="Texture2D" uid="uid://bgrvpjyy1k67l" path="res://Player/Cat_1_spritesheet_free.png" id="1_q3lat"]
+[ext_resource type="PackedScene" uid="uid://4utqj5d51r68" path="res://Player/Bullet/Bulletfire.tscn" id="1_tok1r"]
+[ext_resource type="PackedScene" uid="uid://tr1eaxoke6ny" path="res://Player/Bullet/Air.tscn" id="2_ddoul"]
+[ext_resource type="PackedScene" uid="uid://csmyf70htxiyw" path="res://Player/Bullet/Water.tscn" id="3_8g4oa"]
+
+[sub_resource type="GDScript" id="GDScript_3qydi"]
+resource_name = "Player"
+script/source = "extends CharacterBody2D
+
+# Hareket
+@export var speed: float = 200.0
+
+# Can
+@export var max_hp: float = 100.0
+var current_hp: float = 100.0
+
+# Silah
+@export var bullet_scene: PackedScene
+@export var air_bullet_scene: PackedScene
+@export var water_bullet_scene: PackedScene
+@export var wood_bullet_scene: PackedScene
+@export var bullet_speed: float = 250.0
+@export var bullet_damage: float = 5.0
+@export var fire_rate: float = 0.8
+
+var shoot_timer: float = 0.0
+var double_shot: bool = false
+
+# Air
+var air_unlocked = false
+var air_bounce_count = 1
+
+# Water
+var water_unlocked = false
+var water_interval = 1
+var water_timer = 0.0
+
+# Wood
+var wood_unlocked = false
+var wood_bounce_count = 1
+
+@onready var anim = $AnimationPlayer
+
+func _ready():
+	add_to_group(\"player\")
+	current_hp = max_hp
+
+func _physics_process(_delta):
+	_handle_movement()
+	_handle_shooting(_delta)
+	_handle_water(_delta)
+
+func _handle_movement():
+	var input = Vector2(
+		Input.get_action_strength(\"ui_right\") - Input.get_action_strength(\"ui_left\"),
+		Input.get_action_strength(\"ui_down\") - Input.get_action_strength(\"ui_up\")
+	)
+	if input == Vector2.ZERO:
+		velocity = Vector2.ZERO
+		anim.play(\"idle\")
+		return
+	velocity = input.normalized() * speed
+	move_and_slide()
+	_play_animation(input)
+
+func _handle_shooting(delta):
+	shoot_timer -= delta
+	if shoot_timer > 0:
+		return
+	var target = _get_nearest_enemy()
+	if target == null:
+		return
+	shoot_timer = fire_rate
+	_shoot(target)
+
+func _handle_water(delta):
+	if not water_unlocked:
+		return
+	water_timer -= delta
+	if water_timer <= 0:
+		water_timer = water_interval
+		_shoot_water()
+
+func _get_nearest_enemy() -> Node2D:
+	var enemies = get_tree().get_nodes_in_group(\"enemies\")
+	var nearest = null
+	var min_dist = INF
+	for e in enemies:
+		var d = global_position.distance_to(e.global_position)
+		if d < min_dist:
+			min_dist = d
+			nearest = e
+	return nearest
+
+func _shoot(target: Node2D):
+	if bullet_scene == null:
+		return
+	_fire_bullet(target)
+	if air_unlocked and air_bullet_scene:
+		_fire_air_bullet(target)
+	if wood_unlocked and wood_bullet_scene:
+		_fire_wood_bullet(target)
+	if double_shot:
+		var enemies = get_tree().get_nodes_in_group(\"enemies\")
+		if enemies.size() > 1:
+			_fire_bullet(enemies[1])
+
+func _fire_bullet(target: Node2D):
+	var bullet = bullet_scene.instantiate()
+	get_parent().add_child(bullet)
+	bullet.global_position = global_position
+	var direction = (target.global_position - global_position).normalized()
+	bullet.move_velocity = direction * bullet_speed
+	bullet.damage = bullet_damage
+	bullet.rotation = direction.angle()
+
+func _fire_air_bullet(target: Node2D):
+	var bullet = air_bullet_scene.instantiate()
+	get_parent().add_child(bullet)
+	bullet.global_position = global_position
+	bullet.speed = bullet_speed - 150
+	bullet.damage = bullet_damage * 0.8
+	bullet.hits_remaining = 2
+	bullet.bounce_count = air_bounce_count
+	var direction = (target.global_position - global_position).normalized()
+	bullet.move_velocity = direction * bullet_speed
+	bullet.set_target(target)
+	bullet.rotation = direction.angle()
+
+func _fire_wood_bullet(target: Node2D):
+	var bullet = wood_bullet_scene.instantiate()
+	get_parent().add_child(bullet)
+	bullet.global_position = global_position
+	bullet.speed = bullet_speed - 100
+	bullet.damage = bullet_damage * 1.5
+	bullet.bounce_count = wood_bounce_count
+	bullet.knockback_force = 200.0
+	var direction = (target.global_position - global_position).normalized()
+	bullet.move_velocity = direction * bullet_speed
+	bullet.rotation = direction.angle()
+
+func _shoot_water():
+	if water_bullet_scene == null:
+		return
+	var enemies = get_tree().get_nodes_in_group(\"enemies\")
+	if enemies.is_empty():
+		return
+	var target_enemy = enemies[randi() % enemies.size()]
+	var bullet = water_bullet_scene.instantiate()
+	get_parent().add_child(bullet)
+	bullet.global_position = target_enemy.global_position
+	bullet.move_velocity = Vector2.ZERO
+
+func take_damage(amount: float):
+	current_hp -= amount
+	current_hp = clamp(current_hp, 0, max_hp)
+	if current_hp <= 0:
+		_die()
+
+func _die():
+	get_tree().reload_current_scene()
+
+# Skill sistemi
+func upgrade_speed(amount: float):
+	speed += amount
+
+func upgrade_fire_rate(amount: float):
+	fire_rate = max(0.05, fire_rate - amount)
+
+func upgrade_damage(amount: float):
+	bullet_damage += amount
+
+func upgrade_max_hp(amount: float):
+	max_hp += amount
+	current_hp += amount
+
+func upgrade_double_shot(_value: float):
+	double_shot = true
+
+func upgrade_bullet_speed(amount: float):
+	bullet_speed += amount
+
+func upgrade_air_bullet(_value: float):
+	if not air_unlocked:
+		air_unlocked = true
+	else:
+		air_bounce_count += 1
+
+func upgrade_water_bullet(_value: float):
+	if not water_unlocked:
+		water_unlocked = true
+	else:
+		water_interval = max(1.0, water_interval - 1.0)
+
+func upgrade_wood_bullet(_value: float):
+	if not wood_unlocked:
+		wood_unlocked = true
+	else:
+		wood_bounce_count += 1
+
+func _play_animation(input: Vector2):
+	if input.x > 0 and input.y < 0:
+		anim.play(\"up_right\")
+	elif input.x < 0 and input.y < 0:
+		anim.play(\"up_left\")
+	elif input.x > 0 and input.y > 0:
+		anim.play(\"down_right\")
+	elif input.x < 0 and input.y > 0:
+		anim.play(\"down_left\")
+	elif input.y < 0:
+		anim.play(\"up\")
+	elif input.y > 0:
+		anim.play(\"down\")
+	elif input.x < 0:
+		anim.play(\"left\")
+	else:
+		anim.play(\"right\")
+"
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3qydi"]
+radius = 7.0
+height = 20.0
+
+[sub_resource type="Animation" id="Animation_8g4oa"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_6ysni"]
+resource_name = "down"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 0.13333334, 0.23333333, 0.33333334),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35]
+}
+
+[sub_resource type="Animation" id="Animation_vlldt"]
+resource_name = "down_left"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [60, 61, 62, 63]
+}
+
+[sub_resource type="Animation" id="Animation_s1rgi"]
+resource_name = "down_right"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 0.13333334, 0.23333333, 0.33333334),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [36, 37, 38, 39]
+}
+
+[sub_resource type="Animation" id="Animation_j23h2"]
+resource_name = "idle"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3]
+}
+
+[sub_resource type="Animation" id="Animation_0j2ni"]
+resource_name = "left"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [56, 57, 58, 59]
+}
+
+[sub_resource type="Animation" id="Animation_v0k0e"]
+resource_name = "right"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [40, 41, 42, 43]
+}
+
+[sub_resource type="Animation" id="Animation_5wa8t"]
+resource_name = "up"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [48, 49, 50, 51]
+}
+
+[sub_resource type="Animation" id="Animation_p7tob"]
+resource_name = "up_left"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [52, 53, 54, 55]
+}
+
+[sub_resource type="Animation" id="Animation_dm7nj"]
+resource_name = "up_right"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [44, 45, 46, 45]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_3mea3"]
+_data = {
+&"RESET": SubResource("Animation_8g4oa"),
+&"down": SubResource("Animation_6ysni"),
+&"down_left": SubResource("Animation_vlldt"),
+&"down_right": SubResource("Animation_s1rgi"),
+&"idle": SubResource("Animation_j23h2"),
+&"left": SubResource("Animation_0j2ni"),
+&"right": SubResource("Animation_v0k0e"),
+&"up": SubResource("Animation_5wa8t"),
+&"up_left": SubResource("Animation_p7tob"),
+&"up_right": SubResource("Animation_dm7nj")
+}
+
+[node name="Player" type="CharacterBody2D" unique_id=687870293]
+texture_filter = 1
+script = SubResource("GDScript_3qydi")
+bullet_scene = ExtResource("1_tok1r")
+air_bullet_scene = ExtResource("2_ddoul")
+water_bullet_scene = ExtResource("3_8g4oa")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1742984116]
+z_index = 3
+position = Vector2(0, 1)
+shape = SubResource("CapsuleShape2D_3qydi")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=334690259]
+position = Vector2(0, 1)
+texture = ExtResource("1_q3lat")
+hframes = 32
+vframes = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1515031790]
+libraries/ = SubResource("AnimationLibrary_3mea3")

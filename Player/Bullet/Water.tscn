@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://csmyf70htxiyw"]
+
+[ext_resource type="Texture2D" uid="uid://b2pjmiom2fdj4" path="res://src/Water/Retro Impact Effect Pack 3 C.png" id="1_0x4vk"]
+
+[sub_resource type="GDScript" id="GDScript_8akx7"]
+script/source = "extends Area2D
+
+var move_velocity = Vector2.ZERO
+var damage = 5.0
+var freeze_duration = 2
+
+func _ready():
+	body_entered.connect(_on_body_entered)
+
+func _physics_process(delta):
+	position += move_velocity * delta
+
+func _on_body_entered(body):
+	if not body.is_in_group(\"enemies\"):
+		return
+	body.take_damage(damage)
+	body.freeze(freeze_duration)
+	queue_free()
+
+func _draw():
+	draw_circle(Vector2.ZERO, 7, Color(0.2, 0.4, 1.0))
+
+func _on_visible_on_screen_notifier_2d_screen_exited():
+	queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5m0gc"]
+radius = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ni42o"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(0, 608, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbojl"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(32, 608, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ewbq"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(64, 608, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ubh3w"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(96, 608, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8fy2"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(128, 608, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8uk5p"]
+atlas = ExtResource("1_0x4vk")
+region = Rect2(160, 608, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7ckxb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ni42o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbojl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ewbq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ubh3w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k8fy2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8uk5p")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Bullet" type="Area2D" unique_id=1370350209]
+script = SubResource("GDScript_8akx7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1641536895]
+shape = SubResource("CircleShape2D_5m0gc")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1556292767]
+texture_filter = 1
+position = Vector2(0, 5.04871e-29)
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_7ckxb")
+frame_progress = 0.2333805
+speed_scale = 1.5

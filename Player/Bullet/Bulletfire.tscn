@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://4utqj5d51r68"]
+
+[ext_resource type="Texture2D" uid="uid://dul2d5q6uquua" path="res://src/Fire/FB500-1.png" id="1_li1on"]
+[ext_resource type="Texture2D" uid="uid://l4ebmewh51b0" path="res://src/Fire/FB500-2.png" id="2_durye"]
+[ext_resource type="Texture2D" uid="uid://6qam4qnubm07" path="res://src/Fire/FB500-3.png" id="3_3cnja"]
+[ext_resource type="Texture2D" uid="uid://crorh4ldn5stc" path="res://src/Fire/FB500-4.png" id="4_3mhgn"]
+[ext_resource type="Texture2D" uid="uid://cowajbx2s6qq6" path="res://src/Fire/FB500-5.png" id="5_j0pue"]
+
+[sub_resource type="GDScript" id="GDScript_8akx7"]
+script/source = "extends Area2D
+
+var move_velocity = Vector2.ZERO
+var damage = 10.0
+
+func _ready():
+	body_entered.connect(_on_body_entered)
+
+func _physics_process(delta):
+	position += move_velocity * delta
+
+func _on_body_entered(body):
+	if body.is_in_group(\"enemies\"):
+		body.take_damage(damage)
+		queue_free()
+
+func _on_visible_on_screen_notifier_2d_screen_exited():
+	queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5m0gc"]
+radius = 4.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7ckxb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_li1on")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_durye")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_3cnja")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_3mhgn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_j0pue")
+}],
+"loop": true,
+"name": &"fire",
+"speed": 5.0
+}]
+
+[node name="Bullet" type="Area2D" unique_id=1370350209]
+script = SubResource("GDScript_8akx7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1641536895]
+shape = SubResource("CircleShape2D_5m0gc")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1556292767]
+texture_filter = 1
+position = Vector2(0, 1.4210855e-14)
+scale = Vector2(0.03, 0.03)
+sprite_frames = SubResource("SpriteFrames_7ckxb")
+animation = &"fire"

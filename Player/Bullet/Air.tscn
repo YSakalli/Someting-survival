@@ -105,6 +105,8 @@ animations = [{
 }]
 
 [node name="Bullet" type="Area2D" unique_id=1095273970]
+collision_layer = 4
+collision_mask = 6
 script = SubResource("GDScript_8akx7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1641536895]

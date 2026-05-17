@@ -26,7 +26,6 @@ func _physics_process(delta):
 		return
 	if frozen:
 		return
-
 	if knockback_velocity.length() > 10:
 		velocity = knockback_velocity
 		knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, 0.2)
@@ -34,23 +33,21 @@ func _physics_process(delta):
 		knockback_velocity = Vector2.ZERO
 		var dir = (player.global_position - global_position).normalized()
 		velocity = dir * speed
-
 	move_and_slide()
-
 	if global_position.distance_to(player.global_position) < 20:
 		player.take_damage(damage * delta)
 
 func take_damage(amount: float):
 	hp -= amount
 	if hp <= 0:
-		_drop_gem()
+		call_deferred(\"_drop_gem\")
 		queue_free()
 
 func _drop_gem():
 	if gem_scene == null:
 		return
 	var gem = gem_scene.instantiate()
-	get_parent().add_child(gem)
+	get_parent().call_deferred(\"add_child\", gem)
 	gem.global_position = global_position
 
 func apply_knockback(force: Vector2):

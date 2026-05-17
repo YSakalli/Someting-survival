@@ -44,15 +44,11 @@ var wood_bounce_count = 1
 @onready var camera = $Camera2D
 @onready var damage_flash: ColorRect = $DamageFlash/Rect
 
-# Kamera efektleri
+# Kamera efektleri (azaltıldı)
 var shake_amount: float = 0.0
-var shake_decay: float = 25.0
-var sway_amount: float = 0.0
-var sway_decay: float = 14.0
-var sway_time: float = 0.0
-var sway_speed: float = 14.0
+var shake_decay: float = 40.0
 
-# Ekran flash (hasar/level up vs)
+# Ekran flash
 var flash_amount: float = 0.0
 var flash_decay: float = 1.4
 var flash_color_base: Color = Color(0.9, 0.1, 0.1)
@@ -89,7 +85,6 @@ func _handle_movement():
 		Input.get_action_strength(\"ui_right\") - Input.get_action_strength(\"ui_left\"),
 		Input.get_action_strength(\"ui_down\") - Input.get_action_strength(\"ui_up\")
 	)
-	# WASD desteği
 	if Input.is_key_pressed(KEY_D):
 		input.x += 1.0
 	if Input.is_key_pressed(KEY_A):
@@ -115,11 +110,6 @@ func _update_camera_effects(delta):
 	if shake_amount > 0.0:
 		shake_amount = max(0.0, shake_amount - shake_decay * delta)
 		offset += Vector2(randf_range(-shake_amount, shake_amount), randf_range(-shake_amount, shake_amount))
-	if sway_amount > 0.0:
-		sway_amount = max(0.0, sway_amount - sway_decay * delta)
-		sway_time += delta
-		offset.x += sin(sway_time * sway_speed) * sway_amount
-		offset.y += cos(sway_time * sway_speed * 0.5) * sway_amount * 0.3
 	camera.offset = offset
 	if flash_amount > 0.0:
 		flash_amount = max(0.0, flash_amount - flash_decay * delta)
@@ -129,29 +119,9 @@ func _update_camera_effects(delta):
 func shake_screen(amount: float):
 	shake_amount = max(shake_amount, amount)
 
-func sway_screen(amount: float):
-	sway_amount = max(sway_amount, amount)
-	sway_time = 0.0
-
+# Otomatik ateş
 func _handle_shooting(delta):
-	if shoot_timer > 0:
-		shoot_timer -= delta
-
-var zoom_min: float = 2.0
-var zoom_max: float = 8.0
-var zoom_step: float = 0.5
-
-func _unhandled_input(event):
-	if event is InputEventMouseButton and event.pressed:
-		match event.button_index:
-			MOUSE_BUTTON_LEFT:
-				_try_shoot()
-			MOUSE_BUTTON_WHEEL_UP:
-				_zoom_camera(zoom_step)
-			MOUSE_BUTTON_WHEEL_DOWN:
-				_zoom_camera(-zoom_step)
-
-func _try_shoot():
+	shoot_timer -= delta
 	if shoot_timer > 0:
 		return
 	var target = _get_nearest_enemy()
@@ -159,6 +129,19 @@ func _try_shoot():
 		return
 	shoot_timer = fire_rate
 	_shoot(target)
+
+# Zoom fare tekerleği ile
+var zoom_min: float = 2.0
+var zoom_max: float = 8.0
+var zoom_step: float = 0.5
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		match event.button_index:
+			MOUSE_BUTTON_WHEEL_UP:
+				_zoom_camera(zoom_step)
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_zoom_camera(-zoom_step)
 
 func _zoom_camera(delta_zoom: float):
 	if camera == null:
@@ -247,10 +230,10 @@ func _shoot_water():
 func take_damage(amount: float):
 	current_hp -= amount
 	current_hp = clamp(current_hp, 0, max_hp)
-	shake_screen(10.0)
+	shake_screen(3.0)
 	flash_color_base = Color(0.9, 0.1, 0.1)
 	flash_decay = 1.4
-	flash_amount = max(flash_amount, 0.35)
+	flash_amount = max(flash_amount, 0.2)
 	queue_redraw()
 	if current_hp <= 0:
 		_die()
@@ -524,10 +507,10 @@ vframes = 2
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1515031790]
 libraries/ = SubResource("AnimationLibrary_3mea3")
 
-[node name="DamageFlash" type="CanvasLayer" parent="."]
+[node name="DamageFlash" type="CanvasLayer" parent="." unique_id=2105578569]
 layer = 10
 
-[node name="Rect" type="ColorRect" parent="DamageFlash"]
+[node name="Rect" type="ColorRect" parent="DamageFlash" unique_id=51057382]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

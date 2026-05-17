@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cv1xbid8vyrft" path="res://Player/Player.tscn" id="2_8akx7"]
 [ext_resource type="PackedScene" uid="uid://bl15dv38xgrij" path="res://Enemy.tscn" id="3_5m0gc"]
 [ext_resource type="PackedScene" uid="uid://dip7aqituo5cx" path="res://Player/Bullet/Wood.tscn" id="3_m3qd1"]
+[ext_resource type="Script" uid="uid://cnvpga6beoi5p" path="res://nasiptevarsa/camera_2d.gd" id="4_22mb4"]
 [ext_resource type="Texture2D" uid="uid://c7lhsjjejed88" path="res://src/upgrade.png" id="4_frame"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4kf6v"]
@@ -980,6 +981,7 @@ wood_bullet_scene = ExtResource("3_m3qd1")
 position = Vector2(0, 1)
 zoom = Vector2(5, 5)
 position_smoothing_enabled = true
+script = ExtResource("4_22mb4")
 
 [node name="Spawner" type="Node2D" parent="." unique_id=1811763108]
 position = Vector2(-1, -2)

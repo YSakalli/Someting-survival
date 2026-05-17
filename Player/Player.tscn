@@ -134,7 +134,15 @@ func sway_screen(amount: float):
 	sway_time = 0.0
 
 func _handle_shooting(delta):
-	shoot_timer -= delta
+	if shoot_timer > 0:
+		shoot_timer -= delta
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_try_shoot()
+
+func _try_shoot():
 	if shoot_timer > 0:
 		return
 	var target = _get_nearest_enemy()

@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://tr1eaxoke6ny" path="res://Player/Bullet/Air.tscn" id="2_ddoul"]
 [ext_resource type="PackedScene" uid="uid://csmyf70htxiyw" path="res://Player/Bullet/Water.tscn" id="3_8g4oa"]
 [ext_resource type="PackedScene" uid="uid://dip7aqituo5cx" path="res://Player/Bullet/Wood.tscn" id="4_wood"]
+[ext_resource type="Texture2D" uid="uid://bdm7wbru13sb8" path="res://Player/linux.png" id="5_8g4oa"]
 
 [sub_resource type="GDScript" id="GDScript_3qydi"]
 resource_name = "Player"
@@ -332,9 +333,6 @@ func _play_animation(input: Vector2):
 radius = 7.0
 height = 20.0
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_tok1r"]
-load_path = "res://.godot/imported/Cat_1_spritesheet_free.png-747f7430249385dcdc2d08b4baa4fa40.ctex"
-
 [sub_resource type="Animation" id="Animation_8g4oa"]
 length = 0.001
 tracks/0/type = "value"
@@ -526,7 +524,7 @@ shape = SubResource("CapsuleShape2D_3qydi")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=334690259]
 position = Vector2(0, 1)
-texture = SubResource("CompressedTexture2D_tok1r")
+texture = ExtResource("5_8g4oa")
 hframes = 32
 vframes = 2
 

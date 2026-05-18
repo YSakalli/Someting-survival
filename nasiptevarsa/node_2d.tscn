@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cv1xbid8vyrft" path="res://Player/Player.tscn" id="2_8akx7"]
 [ext_resource type="Script" uid="uid://cnvpga6beoi5p" path="res://nasiptevarsa/camera_2d.gd" id="4_22mb4"]
 [ext_resource type="Texture2D" uid="uid://c7lhsjjejed88" path="res://src/upgrade.png" id="4_frame"]
+[ext_resource type="Shader" path="res://nasiptevarsa/post_process.gdshader" id="5_postfx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m3qd1"]
 texture = ExtResource("1_secbg")
@@ -1394,6 +1395,22 @@ func _unhandled_input(event):
 			get_tree().reload_current_scene()
 "
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_postfx"]
+shader = ExtResource("5_postfx")
+shader_parameter/vignette_strength = 0.85
+shader_parameter/vignette_softness = 0.45
+shader_parameter/vignette_color = Color(0, 0, 0, 1)
+shader_parameter/chromatic_aberration = 0.004
+shader_parameter/scanline_strength = 0.06
+shader_parameter/scanline_count = 720.0
+shader_parameter/grain_strength = 0.05
+shader_parameter/saturation = 1.18
+shader_parameter/contrast = 1.08
+shader_parameter/tint = Color(1.03, 1.0, 0.95, 1)
+shader_parameter/bloom_strength = 0.35
+shader_parameter/bloom_threshold = 0.72
+shader_parameter/bloom_radius = 0.004
+
 [node name="Main" type="Node2D" unique_id=1073499203]
 y_sort_enabled = true
 
@@ -1598,3 +1615,19 @@ theme_override_font_sizes/font_size = 32
 text = "Press R to Restart"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PostProcess" type="CanvasLayer" parent="." unique_id=1357913579]
+layer = 9
+
+[node name="BackBuffer" type="BackBufferCopy" parent="PostProcess" unique_id=1357913580]
+copy_mode = 2
+
+[node name="ScreenRect" type="ColorRect" parent="PostProcess" unique_id=1357913581]
+material = SubResource("ShaderMaterial_postfx")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)

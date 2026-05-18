@@ -1,6 +1,6 @@
 # 🧛 Vampire Survival
 
-> Godot 4 ile yapılmış 2D top-down survival oyunu.
+> Godot 4 ile yapılmış (izometrik) 2D top-down survival oyunu.
 
 ---
 
@@ -15,7 +15,7 @@ Düşmanları öldürdükçe XP kazanırsın, level atlarsın ve her level'da sa
 ## ✨ Özellikler
 
 - **Otomatik Saldırı** — En yakın düşmana otomatik ateş eder
-- **4 Farklı Mermi Tipi** — Normal, Air, Water, Wood
+- **4 Farklı Mermi Tipi** — Normal, Air, Water, Wood (-ateş ,su ,hava, tahta! -evet tahtaaa!)
 - **Level & Skill Sistemi** — Her level'da 3 kart arasından seçim
 - **Wave Sistemi** — Her 30 saniyede düşmanlar güçlenir
 - **3 Farklı Düşman** — Bat, RareBat, RareRareBat

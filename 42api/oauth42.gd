@@ -19,6 +19,11 @@ const TOKEN_URL := "https://api.intra.42.fr/oauth/token"
 const ME_URL := "https://api.intra.42.fr/v2/me"
 const COALITIONS_URL_FMT := "https://api.intra.42.fr/v2/users/%d/coalitions"
 
+# Web build talks to a local Python proxy instead of 42 directly
+# (CORS + no TCP listen in the browser). See auth-proxy/server.py.
+const WEB_BACKEND_LOGIN := "http://localhost:8765/login"
+const WEB_BACKEND_ME_FMT := "http://localhost:8765/api/me?session=%s"
+
 var _uid: String = ""
 var _secret: String = ""
 var _redirect_uri: String = "http://localhost:8765/callback"
@@ -38,6 +43,7 @@ var _pending_peers: Array = []  # [{peer: StreamPeerTCP, buffer: String}, ...]
 var _http_token: HTTPRequest
 var _http_me: HTTPRequest
 var _http_coalitions: HTTPRequest
+var _http_web_session: HTTPRequest
 
 
 func _ready() -> void:
@@ -55,6 +61,13 @@ func _ready() -> void:
 	_http_coalitions = HTTPRequest.new()
 	add_child(_http_coalitions)
 	_http_coalitions.request_completed.connect(_on_coalitions_response)
+
+	_http_web_session = HTTPRequest.new()
+	add_child(_http_web_session)
+	_http_web_session.request_completed.connect(_on_web_session_response)
+
+	if OS.has_feature("web"):
+		_try_resume_web_session.call_deferred()
 
 
 func _load_secrets() -> void:
@@ -74,6 +87,14 @@ func _load_secrets() -> void:
 
 
 func start_login() -> void:
+	if OS.has_feature("web"):
+		emit_signal("status_changed", "42'ye yonlendiriliyorsun...")
+		JavaScriptBridge.eval(
+			"window.location.href = '" + WEB_BACKEND_LOGIN + "';",
+			true,
+		)
+		return
+
 	if _uid == "" or _secret == "":
 		emit_signal("login_failed", "secrets.cfg eksik (UID/SECRET bos).")
 		return
@@ -112,6 +133,51 @@ func start_login() -> void:
 func cancel_login() -> void:
 	_stop_server()
 	emit_signal("status_changed", "Giris iptal edildi.")
+
+
+func _try_resume_web_session() -> void:
+	var token := _read_web_session_token()
+	if token == "":
+		return
+	emit_signal("status_changed", "Kullanici bilgisi cekiliyor...")
+	# Clean ?session= from the URL so a reload doesn't replay a stale token.
+	JavaScriptBridge.eval(
+		"history.replaceState(null, '', window.location.pathname);",
+		true,
+	)
+	var url := WEB_BACKEND_ME_FMT % token.uri_encode()
+	var err := _http_web_session.request(url)
+	if err != OK:
+		emit_signal("login_failed", "Backend /api/me request baslatilamadi (err=%d)." % err)
+
+
+func _read_web_session_token() -> String:
+	var search_var: Variant = JavaScriptBridge.eval("window.location.search", true)
+	if search_var == null:
+		return ""
+	var search := String(search_var)
+	if search.begins_with("?"):
+		search = search.substr(1)
+	for pair in search.split("&"):
+		var kv := pair.split("=", true, 1)
+		if kv.size() == 2 and kv[0] == "session":
+			return kv[1].uri_decode()
+	return ""
+
+
+func _on_web_session_response(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	var text := body.get_string_from_utf8()
+	if response_code != 200:
+		emit_signal("login_failed", "Backend /api/me result=%d code=%d body=%s" % [result, response_code, text])
+		return
+	var json: Variant = JSON.parse_string(text)
+	if typeof(json) != TYPE_DICTIONARY:
+		emit_signal("login_failed", "Backend /api/me JSON parse hatasi.")
+		return
+	user_data = json
+	coalition = String(user_data.get("coalition", ""))
+	element = String(user_data.get("element", "fire"))
+	emit_signal("login_success", user_data)
 
 
 func _generate_state() -> String:

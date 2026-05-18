@@ -1443,7 +1443,6 @@ script = SubResource("GDScript_5m0gc")
 script = SubResource("GDScript_m3qd1")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1020776931]
-visible = false
 script = SubResource("GDScript_hud")
 
 [node name="TimerLabel" type="Label" parent="HUD" unique_id=532231201]
@@ -1512,7 +1511,6 @@ show_percentage = false
 
 [node name="SkillMenu" type="CanvasLayer" parent="." unique_id=2064018963]
 process_mode = 3
-visible = false
 script = SubResource("GDScript_4kf6v")
 
 [node name="Background" type="ColorRect" parent="SkillMenu" unique_id=1017531065]
@@ -1551,7 +1549,6 @@ theme_override_constants/separation = 32
 [node name="GameOverScreen" type="CanvasLayer" parent="." unique_id=-1293967295]
 process_mode = 3
 layer = 10
-visible = false
 script = SubResource("GDScript_gameover")
 
 [node name="Background" type="ColorRect" parent="GameOverScreen" unique_id=-1293967294]

@@ -527,7 +527,8 @@ position = Vector2(0, 1)
 shape = SubResource("CapsuleShape2D_3qydi")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=334690259]
-position = Vector2(0, 1)
+position = Vector2(-2.3841858e-07, -2.3841858e-07)
+scale = Vector2(0.8125, 0.71875)
 texture = ExtResource("5_8g4oa")
 hframes = 32
 vframes = 2

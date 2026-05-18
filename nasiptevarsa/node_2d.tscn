@@ -820,10 +820,13 @@ func _spawn_enemy(scene_path: String):
 script/source = "extends Node
 
 signal level_up(new_level)
+signal kill_added(total_kills)
+signal game_over
 
 var xp: float = 0.0
 var xp_to_next: float = 10.0
 var level: int = 1
+var kills: int = 0
 
 # Wave sistemi
 var wave: int = 1
@@ -864,6 +867,13 @@ func _on_level_up(_new_level):
 
 func get_wave_multiplier() -> float:
 	return 1.0 + (wave - 1) * 0.2
+
+func add_kill():
+	kills += 1
+	kill_added.emit(kills)
+
+func trigger_game_over():
+	game_over.emit()
 "
 
 [sub_resource type="GDScript" id="GDScript_hud"]
@@ -872,14 +882,18 @@ script/source = "extends CanvasLayer
 var elapsed: float = 0.0
 @onready var timer_label: Label = $TimerLabel
 @onready var level_label: Label = $LevelLabel
+@onready var kill_label: Label = $KillLabel
 @onready var xp_bar: ProgressBar = $XPBar
 
 func _ready():
 	add_to_group(\"hud\")
 	_refresh_level()
+	_refresh_kills()
 	var gm = get_tree().get_first_node_in_group(\"game_manager\")
 	if gm and gm.has_signal(\"level_up\"):
 		gm.level_up.connect(_on_level_up)
+	if gm and gm.has_signal(\"kill_added\"):
+		gm.kill_added.connect(_on_kill_added)
 
 func _process(delta):
 	elapsed += delta
@@ -893,6 +907,9 @@ func _process(delta):
 func _on_level_up(new_level):
 	level_label.text = \"LVL %d\" % new_level
 
+func _on_kill_added(total_kills):
+	kill_label.text = \"KILLS %d\" % total_kills
+
 func _refresh_level():
 	var gm = get_tree().get_first_node_in_group(\"game_manager\")
 	if gm:
@@ -900,12 +917,46 @@ func _refresh_level():
 	else:
 		level_label.text = \"LVL 1\"
 
+func _refresh_kills():
+	var gm = get_tree().get_first_node_in_group(\"game_manager\")
+	if gm:
+		kill_label.text = \"KILLS %d\" % gm.kills
+	else:
+		kill_label.text = \"KILLS 0\"
+
 func _refresh_xp():
 	var gm = get_tree().get_first_node_in_group(\"game_manager\")
 	if gm == null:
 		return
 	xp_bar.max_value = gm.xp_to_next
 	xp_bar.value = gm.xp
+"
+
+[sub_resource type="GDScript" id="GDScript_gameover"]
+script/source = "extends CanvasLayer
+
+@onready var label: Label = $GameOverLabel
+@onready var hint: Label = $HintLabel
+@onready var background: ColorRect = $Background
+
+func _ready():
+	visible = false
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	var gm = get_tree().get_first_node_in_group(\"game_manager\")
+	if gm and gm.has_signal(\"game_over\"):
+		gm.game_over.connect(_on_game_over)
+
+func _on_game_over():
+	visible = true
+	get_tree().paused = true
+
+func _unhandled_input(event):
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_R or event.keycode == KEY_SPACE or event.keycode == KEY_ENTER:
+			get_tree().paused = false
+			get_tree().reload_current_scene()
 "
 
 [sub_resource type="SystemFont" id="SystemFont_pixel"]
@@ -1133,6 +1184,24 @@ text = "LVL 1"
 horizontal_alignment = 2
 vertical_alignment = 1
 
+[node name="KillLabel" type="Label" parent="HUD" unique_id=1923252640]
+texture_filter = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 68.0
+offset_right = -20.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = SubResource("SystemFont_pixel")
+theme_override_font_sizes/font_size = 26
+text = "KILLS 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="XPBar" type="ProgressBar" parent="HUD" unique_id=1845952137]
 texture_filter = 1
 anchors_preset = 10
@@ -1182,3 +1251,59 @@ offset_top = 117.0
 offset_right = 1090.0
 offset_bottom = 477.0
 theme_override_constants/separation = 32
+
+[node name="GameOverScreen" type="CanvasLayer" parent="." unique_id=3001000001]
+layer = 10
+process_mode = 3
+script = SubResource("GDScript_gameover")
+
+[node name="Background" type="ColorRect" parent="GameOverScreen" unique_id=3001000002]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.18, 0.18, 0.2, 0.85)
+
+[node name="GameOverLabel" type="Label" parent="GameOverScreen" unique_id=3001000003]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -120.0
+offset_right = 500.0
+offset_bottom = 0.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = SubResource("SystemFont_pixel")
+theme_override_font_sizes/font_size = 120
+text = "GAME OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HintLabel" type="Label" parent="GameOverScreen" unique_id=3001000004]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = 40.0
+offset_right = 400.0
+offset_bottom = 100.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = SubResource("SystemFont_pixel")
+theme_override_font_sizes/font_size = 32
+text = "Press R to Restart"
+horizontal_alignment = 1
+vertical_alignment = 1

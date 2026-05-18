@@ -46,6 +46,9 @@ func _physics_process(delta):
 func take_damage(amount: float):
 	hp -= amount
 	if hp <= 0:
+		var gm = get_tree().get_first_node_in_group(\"game_manager\")
+		if gm and gm.has_method(\"add_kill\"):
+			gm.add_kill()
 		call_deferred(\"_drop_gem\")
 		queue_free()
 

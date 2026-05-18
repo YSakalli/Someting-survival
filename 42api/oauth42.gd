@@ -8,8 +8,8 @@ const TOKEN_URL := "https://api.intra.42.fr/oauth/token"
 const ME_URL := "https://api.intra.42.fr/v2/me"
 const COALITIONS_URL_FMT := "https://api.intra.42.fr/v2/users/%d/coalitions"
 
-var _uid: String = "u-s4t2ud-f622f15ad067886daa95a2cca02bc19574412cb85d528b16043dd6591d3eeb01"
-var _secret: String = "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"
+var _uid: String = ""
+var _secret: String = ""
 var _redirect_uri: String = ""
 
 var access_token: String = ""

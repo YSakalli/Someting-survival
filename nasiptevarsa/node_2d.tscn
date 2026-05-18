@@ -914,9 +914,18 @@ antialiasing = 0
 hinting = 0
 subpixel_positioning = 0
 
-[sub_resource type="Theme" id="Theme_m3qd1"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xp_bg"]
+bg_color = Color(0.04, 0.04, 0.06, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4kf6v"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xp_fill"]
+bg_color = Color(0.25, 0.85, 1, 1)
+border_width_top = 2
+border_color = Color(0.7, 0.95, 1, 1)
 
 [sub_resource type="GDScript" id="GDScript_4kf6v"]
 script/source = "extends CanvasLayer
@@ -1094,9 +1103,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -90.0
-offset_top = 14.0
+offset_top = 24.0
 offset_right = 90.0
-offset_bottom = 64.0
+offset_bottom = 74.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
@@ -1112,9 +1121,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -200.0
-offset_top = 14.0
+offset_top = 24.0
 offset_right = -20.0
-offset_bottom = 56.0
+offset_bottom = 66.0
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
@@ -1126,13 +1135,16 @@ vertical_alignment = 1
 
 [node name="XPBar" type="ProgressBar" parent="HUD" unique_id=1845952137]
 texture_filter = 1
-offset_left = 1793.0
-offset_top = -1.0
-offset_right = 1797.0
-offset_bottom = 31.0
-scale = Vector2(2, 2)
-theme = SubResource("Theme_m3qd1")
-theme_override_styles/background = SubResource("StyleBoxTexture_4kf6v")
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 18.0
+grow_horizontal = 2
+show_percentage = false
+theme_override_styles/background = SubResource("StyleBoxFlat_xp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_xp_fill")
 
 [node name="SkillMenu" type="CanvasLayer" parent="." unique_id=2064018963]
 process_mode = 3

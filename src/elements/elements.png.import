@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7k26mpxbmpsx"
-path="res://.godot/imported/ShootAntecipation-Sheet.png-773d8648258a61462e42a3a1aac35324.ctex"
+uid="uid://bvf34hffucfhf"
+path="res://.godot/imported/elements.png-fd8d3aa8226a57aa483412d71c0776f2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ShootAntecipation-Sheet.png"
-dest_files=["res://.godot/imported/ShootAntecipation-Sheet.png-773d8648258a61462e42a3a1aac35324.ctex"]
+source_file="res://src/elements/elements.png"
+dest_files=["res://.godot/imported/elements.png-fd8d3aa8226a57aa483412d71c0776f2.ctex"]
 
 [params]
 

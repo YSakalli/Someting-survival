@@ -9,8 +9,13 @@ var move_velocity = Vector2.ZERO
 var damage = 5.0
 var freeze_duration = 2
 
+@onready var anim = $AnimatedSprite2D
+
 func _ready():
 	body_entered.connect(_on_body_entered)
+	anim.sprite_frames.set_animation_loop(\"default\", false)
+	anim.z_index = 10
+	anim.visible = false  # başta gizli
 
 func _physics_process(delta):
 	position += move_velocity * delta
@@ -20,10 +25,15 @@ func _on_body_entered(body):
 		return
 	body.take_damage(damage)
 	body.freeze(freeze_duration)
+	move_velocity = Vector2.ZERO
+	$CollisionShape2D.set_deferred(\"disabled\", true)
+	anim.visible = true   # çarpınca göster
+	anim.play(\"default\")
+	var frame_count = anim.sprite_frames.get_frame_count(\"default\")
+	var fps = anim.sprite_frames.get_animation_speed(\"default\")
+	var duration = frame_count / fps
+	await get_tree().create_timer(duration).timeout
 	queue_free()
-
-func _draw():
-	draw_circle(Vector2.ZERO, 7, Color(0.2, 0.4, 1.0))
 
 func _on_visible_on_screen_notifier_2d_screen_exited():
 	queue_free()
@@ -83,6 +93,8 @@ animations = [{
 }]
 
 [node name="Bullet" type="Area2D" unique_id=1370350209]
+collision_layer = 4
+collision_mask = 6
 script = SubResource("GDScript_8akx7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1641536895]
@@ -91,7 +103,7 @@ shape = SubResource("CircleShape2D_5m0gc")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1556292767]
 texture_filter = 1
 position = Vector2(0, 5.04871e-29)
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.6, 0.6)
 sprite_frames = SubResource("SpriteFrames_7ckxb")
-frame_progress = 0.2333805
-speed_scale = 1.5
+frame_progress = 0.9390086
+speed_scale = 2.0
